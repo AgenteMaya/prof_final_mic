@@ -11,24 +11,24 @@
     <body>
         <div id = "body" class = "jumbotron text-center">
             <h1>CADASTRAMENTO <span id = "s1"></span></h1>
-            <form>
+            <form action = "{{ url_for('cadastra')}}" method="post">
                 <fieldset>
                     <div>
                         <label for= "nome">nome: </label>
-                        <input id = "nome" type = "text" placeholder="Nome do aluno">
+                        <input id = "nome" type = "text" name = "fNome" placeholder="Nome do aluno">
                     </div>
                     
                     <div>
                         <label for= "matricula">matricula: </label>
-                        <input id = "matricula" type = "text" placeholder="Matricula do aluno">
+                        <input id = "matricula" type = "text" name = "fMatricula" placeholder="Matricula do aluno">
                     </div>        
                     
                     <div>
                         <label for = "foto"> Foto estudante: </label>
-                        <input id = "foto" type = "file">
+                        <input id = "foto" type = "file" name = "fFoto">
                     </div>
 
-                    <input type = "submit">
+                    <button id = "btnEnviar" type="submit">Enviar</button>
                 </fieldset>
             </form>
         </div>
