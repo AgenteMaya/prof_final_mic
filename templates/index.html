@@ -5,10 +5,11 @@
         <title>Menu</title> 
 
         <link rel="stylesheet" type="text/css" href="static/index.css">
+        <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     </head>
 
     <body>
-        <div id = "body">
+        <div id = "body" class = "jumbotron text-center">
             <h1>Turma <span id = "s1"></span></h1>
             <a href = "/cadastramento.html"><div class = "sqrMainPage">
                 <p>Adicionar</p>

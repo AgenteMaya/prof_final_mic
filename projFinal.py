@@ -3,7 +3,7 @@ import os
 
 lAlunos = []
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -30,14 +30,14 @@ def cadastra():
         
         else:
             lAlunos.append([nome, matricula, None])
-        print("O aluno é " + nome + " e a matrícula dele é " + matricula + "e a foto dele é " + str(type(foto)))
-        print(lAlunos)
+        #print("O aluno é " + nome + " e a matrícula dele é " + matricula + "e a foto dele é " + str(type(foto)))
+        #print(lAlunos)
         return render_template("index.html")
     return render_template("cadastramento.html")
 
 @app.route("/ver_lista.html")
 def visualiza():
-    return render_template("ver_lista.html")
+    return render_template("ver_lista.html", lAlunos = lAlunos)
 
 app.run(port=5002, debug=False)
 

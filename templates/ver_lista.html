@@ -10,8 +10,16 @@
     <body>
         <div id = "body">
             <h1>LISTA <span id = "s1"></span></h1>
-            <ul id  = "student_list">
-                
+            <ul class = "student_list_unity">
+                {%for aluno in lAlunos%}
+                    <li>
+                        <img class = "student_photo" src = "static/uploads/{{aluno[2]}}" alt="">
+                        <div class = d_infos>
+                            <p class = "student_name">Aluno: {{aluno[0]}}</p>
+                            <p class = "student_matricula">Aluno: {{aluno[1]}}</p>
+                        </div>
+                    </li>
+                {% endfor %} 
             </ul>
         </div>
         <a href = "/"><button class = "btnVoltar">Voltar</button></a>
