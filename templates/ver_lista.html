@@ -9,10 +9,10 @@
 
     <body>
         <div id = "body">
-            <h1>LISTA <span id = "s1"></span></h1>
+            <h1>LISTA DE ALUNOS<span id = "s1"></span></h1>
             <ul class = "student_list_unity">
                 {%for aluno in lAlunos%}
-                    <li>
+                    <li classe = "um_elemento">
                         <img class = "student_photo" src = "static/uploads/{{aluno[2]}}" alt="">
                         <div class = d_infos>
                             <p class = "student_name">Aluno: {{aluno[0]}}</p>
