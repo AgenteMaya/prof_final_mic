@@ -13,16 +13,16 @@
             <ul class = "student_list_unity">
                 {%for aluno in lAlunos%}
                     <li classe = "um_elemento">
-                        <img class = "student_photo" src = "static/uploads/{{aluno[2]}}" alt="">
+                        <img class = "student_photo" src = "static/uploads/{{aluno[3]}}" alt="">
                         <div class = d_infos>
-                            <p class = "student_name">Aluno: {{aluno[0]}}</p>
-                            <p class = "student_matricula">Aluno: {{aluno[1]}}</p>
+                            <p class = "student_name">{{aluno[0]}}</p>
+                            <p class = "student_matricula">{{aluno[1]}}</p>
+                            <p class = "student_curso">{{aluno[2]}}</p>
                         </div>
                     </li>
                 {% endfor %} 
             </ul>
         </div>
-        <a href = "/"><button class = "btnVoltar">Voltar</button></a>
     </body>
 
 </html>
