@@ -13,7 +13,7 @@
             <h1>CADASTRAMENTO <span id = "s1"></span></h1>
 
             {% if (error) %}
-                !Erro! Não pode inserir alunos com matrículas iguais!
+                Erro! Não pode inserir alunos com matrículas iguais!
             {% endif %}
 
             <form action = "{{ url_for('cadastra')}}" method="post" enctype="multipart/form-data">
@@ -22,25 +22,25 @@
                         <div >                        
                             <div id = "d_name">
                                 <label for= "nome">nome: </label>
-                                <input id = "nome" type = "text" name = "fNome" placeholder="Nome do aluno">
+                                <input id = "nome" type = "text" name = "fNome"  value = "{{lCadastro[0]}}" placeholder="Nome do aluno">
                             </div>
                             
                             <div id = "d_matricula">
                                 <label for= "matricula">matricula: </label>
-                                <input id = "matricula" type = "text" name = "fMatricula" placeholder="Matricula do aluno">
+                                <input id = "matricula" type = "text" name = "fMatricula" value = "{{lCadastro[1]}}" placeholder="Matricula do aluno">
                             </div>        
 
                             <div id = "d_curso">
-                                <input id = "engenharia" type = "radio" name = "fCurso" value = "Engenharia">
+                                <input id = "engenharia" type = "radio" name = "fCurso" value="Engenharia" {% if lCadastro[2] == 'Engenharia' %}checked{% endif %}>
                                 <label for= "engenharia">Engenharia </label>
 
-                                <input id = "ciência da computação" type = "radio" name = "fCurso" value = "Ciência da Computação">
+                                <input id = "ciência da computação" type = "radio" name = "fCurso" value = "Ciência da Computação" {% if lCadastro[2] == 'Ciência da Computação' %}checked{% endif %}>
                                 <label for= "ciência da computação">Ciência da Computação </label>
                             </div>    
                             
                             <div id = "d_photo">
                                 <label for = "foto"> Foto estudante: </label>
-                                <input id = "foto" type = "file" name = "fFoto" accept="image/*">
+                                <input id = "foto" type = "file" name = "fFoto" accept="image/*" >
                             </div>
 
                             <a href = "/">
