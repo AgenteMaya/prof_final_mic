@@ -34,10 +34,12 @@ body {
 }
 
 #d_matricula{
+   
     margin-bottom: 10px;
 }
 
-#d_curso{
+#d_curso{ 
+    margin-top: 10px;
     margin-bottom: 10px;
 }
 
@@ -67,4 +69,18 @@ body {
     border-radius: 5px;
     cursor: pointer;
     align-self: center;
+}
+
+.flex-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaçamento entre os elementos */
+}
+
+.flex-container label {
+    margin: 0;
+}
+
+.flex-container input {
+    margin: 0 5px; /* Espaçamento entre os inputs e labels */
 }

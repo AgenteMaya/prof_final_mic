@@ -4,7 +4,7 @@
         <meta charset="utf-8"/> 
         <title>Menu</title> 
 
-        <link rel="stylesheet" type="text/css" href="static/edita.css">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='edita.css') }}">
         <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     </head>
 
@@ -16,21 +16,17 @@
                 Erro! Insira uma matrícula já existente.
             {% endif %}
 
-            <form action = "{{ url_for('edita')}}" method="post" enctype="multipart/form-data">
+            <form action = "{{ url_for('edita', num = num)}}" method="post" enctype="multipart/form-data">
                 <div id = "d_geral_forms" class = "jumbotron text-center">                
                     <fieldset>
                         <div >                        
                             <div id = "d_name">
                                 <label for= "nome">nome: </label>
                                 <input id = "nome" type = "text" name = "fNome"  value = "{{lEdita[0]}}" placeholder="Nome do aluno">
-                            </div>
-                            
-                            <div id = "d_matricula">
-                                <label for= "matricula">matricula: </label>
-                                <input id = "matricula" type = "text" name = "fMatricula" value = "{{lEdita[1]}}" placeholder="Matricula do aluno">
-                            </div>        
+                            </div>    
 
                             <div id = "d_curso">
+                                <label>curso:</label>
                                 <input id = "engenharia" type = "radio" name = "fCurso" value="Engenharia" {% if lEdita[2] == 'Engenharia' %}checked{% endif %}>
                                 <label for= "engenharia">Engenharia </label>
 
@@ -43,9 +39,9 @@
                                 <input id = "foto" type = "file" name = "fFoto" accept="image/*" >
                             </div>
 
-                            <a href = "/">
+                            
                                 <button id = "btnEnviar" type="submit">Enviar</button>
-                            </a>
+                           
                         </div>
                     </fieldset>
                 </div>
