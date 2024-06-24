@@ -4,6 +4,7 @@ from pymongo import MongoClient, ASCENDING, DESCENDING
 import os
 import json 
 import ast
+from datetime import datetime, time
 
 
 uri = "mongodb+srv://rrddamazio:vQ4lM2M1zErxlIFY@bdprojfinalmic.rgwiall.mongodb.net/?retryWrites=true&w=majority&appName=bdProjFinalMic"
@@ -28,31 +29,39 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route("/passaPresenca", methods = ["GET", "POST"])
 def passaPresenca():
     print("entrei na funcao")
-    if request.method == "POST":
-        arqJson = request.get_json()
-        print(arqJson) # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx"}]}
-        print("entrei aqui")
-        
+    #if request.method == "POST":
+        #arqJson = request.get_json()
+    arqJson = json.dumps({"data": "23/05/2024", "presencas": [{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "00:59:05"}]})
+    print(arqJson)
+        # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx"}]}
+        #{"data": "23/05/2024", "presencas": ["{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "00:59:05"}]}
+    print("entrei aqui")   
+    arqJson = json.loads(arqJson)
+    print(arqJson)
+    
+    lMatriculas = []
+    lDatas = []
+    for aluno in arqJson["presenca"]:
+        lMatriculas.append(aluno["matricula"])
+        lDatas.append(datetime.strptime(aluno["hora"], "%M:%H:%S").time())
 
-        """
-        arqJson = json.loads(arqJson)
-        
-        lMatriculas = []
-        for aluno in arqJson["presenca"]:
-            lMatriculas.append(aluno["matricula"])
-
-        for aluno in colecao.find():
-            if aluno["matricula"] in lMatriculas:
-                colecao.update_one({"matricula" : aluno["matricula"]}, {"$set":{aluno["presenca"].append([arqJson["data"], "presente"])}})
+    for aluno in colecao.find():
+        if aluno["matricula"] in lMatriculas:
+            ind = lMatriculas.index(aluno["matricula"])
+            horaAluno = lDatas[ind]
+            horaAula = datetime.strptime(colecaoDias.find_one({"dia" : "jhk"})["hora"], "%M:%H:%S").time()
+            if horaAluno <= horaAula:
+                presencaAluno = {""}
+            colecao.update_one({"matricula" : aluno["matricula"]}, {"$set":{aluno["presenca"].append([arqJson["data"], "presente"])}})
 
 
 
-            for presente in arqJson["presenca"]:
-                if aluno["matricula"] == presente["matricula"]:
-                    #TODO tratamento do caso de atrasado ou não
-        """
+        for presente in arqJson["presenca"]:
+            if aluno["matricula"] == presente["matricula"]:
+                #TODO tratamento do caso de atrasado ou não
 
-        return jsonify(arqJson)
+
+    return jsonify(arqJson)
     return "não foi"
                 
 
