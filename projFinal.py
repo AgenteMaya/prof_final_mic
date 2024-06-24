@@ -10,7 +10,8 @@ uri = "mongodb+srv://rrddamazio:vQ4lM2M1zErxlIFY@bdprojfinalmic.rgwiall.mongodb.
 cliente = MongoClient(uri, 27017)
 
 banco = cliente["banco_proj_final"]
-colecaoAlunos = banco["alunos"]
+colecao = banco["alunos"] #colecaoALunos
+colecaoDias = banco["aulas"]
 
 #lAlunos = []
 
@@ -40,9 +41,9 @@ def passaPresenca():
         for aluno in arqJson["presenca"]:
             lMatriculas.append(aluno["matricula"])
 
-        for aluno in colecaoAlunos.find():
+        for aluno in colecao.find():
             if aluno["matricula"] in lMatriculas:
-                colecaoAlunos.update_one({"matricula" : aluno["matricula"]}, {"$set":{aluno["presenca"].append([arqJson["data"], "presente"])}})
+                colecao.update_one({"matricula" : aluno["matricula"]}, {"$set":{aluno["presenca"].append([arqJson["data"], "presente"])}})
 
 
 
@@ -63,7 +64,7 @@ def passaPresenca():
 @app.route("/index.html")
 def menu():    
     lAlunos = []
-    for elem in colecaoAlunos.find():
+    for elem in colecao.find():
         lAlunos.append(elem)
     return render_template("index.html", lAlunos = lAlunos)
 
@@ -77,7 +78,7 @@ def cadastra():
         foto = request.files.get("fFoto")
 
         #ind = busca(matricula)
-        ind = colecaoAlunos.find_one({"matricula" : matricula})
+        ind = colecao.find_one({"matricula" : matricula})
         print(ind)
         print(type(ind))
         if ind != None:           
@@ -91,22 +92,22 @@ def cadastra():
             foto_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
             foto.save(foto_path)    
             #lAlunos.append({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : foto.filename, "presenca" : []})        
-            colecaoAlunos.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : foto.filename, "presenca" : []})
+            colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : foto.filename, "presenca" : []})
         else:
             #lAlunos.append({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : None, "presenca" : []})
-            colecaoAlunos.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : None, "presenca" : []})
+            colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : None, "presenca" : []})
         return redirect(url_for("menu"))
     else:
         return render_template("cadastramento.html", lCadastro = lCadastro)
     
 @app.route("/exclui/<num>.html", methods = ["GET", "POST"]) #mudado
 def exclui(num):  
-    colecaoAlunos.delete_one({"matricula" : num})
+    colecao.delete_one({"matricula" : num})
     return redirect(url_for("menu"))
     
 @app.route("/edita/<num>.html", methods = ["GET", "POST"]) #mudado
 def edita(num):
-    aluno = colecaoAlunos.find_one({"matricula" : num})
+    aluno = colecao.find_one({"matricula" : num})
 
     lEdita = ["", "", ""]
     lEdita[0] = aluno["nome"]
@@ -121,10 +122,10 @@ def edita(num):
             foto_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
             foto.save(foto_path)
             print({"matricula" : num}, {"nome": nome, "matricula" : num, "curso" : curso, "foto" : foto.filename, "presenca" : aluno["presenca"]})
-            colecaoAlunos.update_one({"matricula" : num}, {"$set":{"nome": nome, "matricula" : num, "curso" : curso, "foto" : foto.filename, "presenca" : aluno["presenca"]}})
+            colecao.update_one({"matricula" : num}, {"$set":{"nome": nome, "matricula" : num, "curso" : curso, "foto" : foto.filename, "presenca" : aluno["presenca"]}})
         else:    
             print({"matricula" : num}, {"nome": nome, "matricula" : num, "curso" : curso, "foto" : None, "presenca" : aluno["presenca"]})
-            colecaoAlunos.update_one({"matricula" : num}, {"$set":{"nome": nome, "matricula" : num, "curso" : curso, "foto" : None, "presenca" : aluno["presenca"]}})
+            colecao.update_one({"matricula" : num}, {"$set":{"nome": nome, "matricula" : num, "curso" : curso, "foto" : None, "presenca" : aluno["presenca"]}})
 
         return redirect(url_for("menu"))
     return render_template("edita.html", lEdita = lEdita, num = num) 
@@ -132,7 +133,7 @@ def edita(num):
 @app.route("/presenca/<num>.html", methods = ["GET", "POST"]) #mudado
 def presenca(num):
     #ind = busca(num)
-    aluno = colecaoAlunos.find_one({"matricula" : num})
+    aluno = colecao.find_one({"matricula" : num})
     lpresenca = []
     print(aluno["presenca"])
     for elemento in aluno["presenca"]:
