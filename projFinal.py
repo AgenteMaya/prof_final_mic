@@ -5,7 +5,9 @@ import os
 import json 
 import ast
 from datetime import datetime, time
+import requests
 
+ARDUINO_IP = ""
 
 uri = "mongodb+srv://rrddamazio:vQ4lM2M1zErxlIFY@bdprojfinalmic.rgwiall.mongodb.net/?retryWrites=true&w=majority&appName=bdProjFinalMic"
 cliente = MongoClient(uri, 27017)
@@ -68,9 +70,9 @@ def cadastra():
             # Salvar a foto no diretório de uploads
             foto_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
             foto.save(foto_path)          
-            colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : foto.filename, "presenca" : []})
+            colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : foto.filename, "presenca" : [], "uid" : ""})
         else:
-            colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : None, "presenca" : []})
+            colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : None, "presenca" : [], "uid" : ""})
         return redirect(url_for("menu"))
     else:
         return render_template("cadastramento.html", lCadastro = lCadastro)
@@ -158,8 +160,23 @@ def passaPresenca():
 
 @app.route("/passaInfo", methods = ["GET", "POST"])
 def passaInfo():
+    lAlunos = []
+    for aluno in colecao.find():
+        lAlunos.append({"nome" : aluno["nome"], "matricula" : aluno["matricula"], "uid" : aluno["uid"]})
+    print(lAlunos)
+    arqJson = json.dumps({"alunos" : lAlunos})
+    print(arqJson)
 
-    return "oi"
+    try:
+        # Enviar JSON para o Arduino
+        response = requests.post(f"{ARDUINO_IP}/endpoint_arduino", json={"alunos": lAlunos})
+        if response.status_code == 200:
+            return jsonify({"message": "Dados enviados para o Arduino com sucesso!", "alunos": lAlunos}), 200
+        else:
+            return jsonify({"message": "Falha ao enviar dados para o Arduino.", "alunos": lAlunos}), 500
+    except requests.exceptions.RequestException as e:
+        return jsonify({"message": f"Erro de comunicação: {e}", "alunos": lAlunos}), 500
+    #return jsonify({"alunos" : lAlunos})
 
 @app.route("/recebeCadastro", methods = ["GET", "POST"])
 def recebeCadastro():
