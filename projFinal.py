@@ -54,7 +54,7 @@ def cadastra():
         matricula = request.form.get("fMatricula")
         curso = request.form.get("fCurso")
         foto = request.files.get("fFoto")
-        
+
         ind = colecao.find_one({"matricula" : matricula})
         print(ind)
         print(type(ind))
@@ -83,7 +83,6 @@ def exclui(num):
 @app.route("/edita/<num>.html", methods = ["GET", "POST"]) #mudado
 def edita(num):
     aluno = colecao.find_one({"matricula" : num})
-
     lEdita = ["", "", ""]
     lEdita[0] = aluno["nome"]
     if aluno["curso"] ==  "não informado":
@@ -124,10 +123,8 @@ def criaAula():
 @app.route("/passaPresenca", methods = ["GET", "POST"])
 def passaPresenca():
     if request.method == "POST":
-        arqJson = request.get_json()
+        arqJson = request.get_json() # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx"}]}
         #arqJson = json.dumps({"data": "23-05-2024", "presencas": [{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "22:59:05"}]})
-            # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx"}]}
-            #{"data": "23/05/2024", "presencas": ["{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "00:59:05"}]} 
         arqJson = json.loads(arqJson)
         lMatriculas = []
         lDatas = []
@@ -159,12 +156,10 @@ def passaPresenca():
         return jsonify(arqJson)
     return "não foi"
 
-"""
 @app.route("/passaInfo", methods = ["GET", "POST"])
 def passaInfo():
 
     return "oi"
-"""
 
 @app.route("/recebeCadastro", methods = ["GET", "POST"])
 def recebeCadastro():
