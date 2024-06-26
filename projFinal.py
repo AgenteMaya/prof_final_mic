@@ -54,8 +54,7 @@ def cadastra():
         matricula = request.form.get("fMatricula")
         curso = request.form.get("fCurso")
         foto = request.files.get("fFoto")
-
-        #ind = busca(matricula)
+        
         ind = colecao.find_one({"matricula" : matricula})
         print(ind)
         print(type(ind))
@@ -68,11 +67,9 @@ def cadastra():
         elif foto:
             # Salvar a foto no diretório de uploads
             foto_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
-            foto.save(foto_path)    
-            #lAlunos.append({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : foto.filename, "presenca" : []})        
+            foto.save(foto_path)          
             colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : foto.filename, "presenca" : []})
         else:
-            #lAlunos.append({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : None, "presenca" : []})
             colecao.insert_one({"nome":nome, "matricula" : matricula, "curso" : curso, "foto" : None, "presenca" : []})
         return redirect(url_for("menu"))
     else:
@@ -89,7 +86,10 @@ def edita(num):
 
     lEdita = ["", "", ""]
     lEdita[0] = aluno["nome"]
-    lEdita[2] = aluno["curso"]
+    if aluno["curso"] ==  "não informado":
+        lEdita[2] = "Engenharia"
+    else:
+        lEdita[2] = aluno["curso"]
 
     if request.method == "POST":
         nome = request.form.get("fNome")
@@ -99,18 +99,17 @@ def edita(num):
         if foto:
             foto_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
             foto.save(foto_path)
-            print({"matricula" : num}, {"nome": nome, "matricula" : num, "curso" : curso, "foto" : foto.filename, "presenca" : aluno["presenca"]})
-            colecao.update_one({"matricula" : num}, {"$set":{"nome": nome, "matricula" : num, "curso" : curso, "foto" : foto.filename, "presenca" : aluno["presenca"]}})
+            print({"matricula" : num}, {"nome": nome, "curso" : curso, "foto" : foto.filename})
+            colecao.update_one({"matricula" : num}, {"$set":{"nome": nome, "curso" : curso, "foto" : foto.filename}})
         else:    
-            print({"matricula" : num}, {"nome": nome, "matricula" : num, "curso" : curso, "foto" : None, "presenca" : aluno["presenca"]})
-            colecao.update_one({"matricula" : num}, {"$set":{"nome": nome, "matricula" : num, "curso" : curso, "foto" : None, "presenca" : aluno["presenca"]}})
+            print({"matricula" : num}, {"nome": nome,"curso" : curso, "foto" : None})
+            colecao.update_one({"matricula" : num}, {"$set":{"nome": nome, "curso" : curso, "foto" : None}})
 
         return redirect(url_for("menu"))
     return render_template("edita.html", lEdita = lEdita, num = num) 
 
 @app.route("/presenca/<num>.html", methods = ["GET", "POST"]) #mudado
 def presenca(num):
-    #ind = busca(num)
     aluno = colecao.find_one({"matricula" : num})
     lpresenca = aluno["presenca"]
     return render_template("presenca.html", lpresenca = lpresenca) 
@@ -124,25 +123,17 @@ def criaAula():
 
 @app.route("/passaPresenca", methods = ["GET", "POST"])
 def passaPresenca():
-    #print("entrei na funcao")
     if request.method == "POST":
         arqJson = request.get_json()
         #arqJson = json.dumps({"data": "23-05-2024", "presencas": [{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "22:59:05"}]})
-        #print(arqJson)
             # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx"}]}
-            #{"data": "23/05/2024", "presencas": ["{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "00:59:05"}]}
-        #print("entrei aqui")   
+            #{"data": "23/05/2024", "presencas": ["{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "00:59:05"}]} 
         arqJson = json.loads(arqJson)
-        #print(arqJson)
-        
         lMatriculas = []
         lDatas = []
-        #print(arqJson["data"])
         data = arqJson["data"]
         data= datetime.strptime(arqJson["data"], "%d-%m-%Y")
         data = data.strftime("%d-%m-%Y")
-        #print(data)
-        #print(arqJson["presencas"])
         for aluno in arqJson["presencas"]:
             lMatriculas.append(aluno["matricula"])
             lDatas.append(datetime.strptime(aluno["hora"], "%H:%M:%S").time())
@@ -160,20 +151,39 @@ def passaPresenca():
                     presencaAluno = [data, "presente", "atrasado"]
             else:
                 presencaAluno = [data, "faltou", "-"]
-            
-            print(aluno["presenca"])
-            lAlunoPresenca = [ast.literal_eval(item) for item in aluno["presenca"]]
-            print(lAlunoPresenca)
-            lAlunoPresenca.append(presencaAluno)
-            print(lAlunoPresenca)
 
+            lAlunoPresenca = [ast.literal_eval(item) for item in aluno["presenca"]]
+            lAlunoPresenca.append(presencaAluno)
             colecao.update_one({"matricula" : aluno["matricula"]}, {"$set":{"presenca" : lAlunoPresenca}})
 
         return jsonify(arqJson)
     return "não foi"
 
+"""
 @app.route("/passaInfo", methods = ["GET", "POST"])
 def passaInfo():
-    
+
+    return "oi"
+"""
+
+@app.route("/recebeCadastro", methods = ["GET", "POST"])
+def recebeCadastro():
+    if request.method == "POST":
+        arqJson = request.get_json() #{"uid": "anlifu", "nome" : "hdjfsakl", "matricula" : xxxxxx}
+        #arqJson = json.dumps({"uid": "45649", "nome" : "hdjfsakl", "matricula" : 2210833})
+        arqJson = json.loads(arqJson)
+        alunoExiste = colecao.find_one({"matricula" : str(arqJson["matricula"])})
+        if alunoExiste != None:
+            colecao.update_one({"matricula" : str(arqJson["matricula"])}, {"$set":{"uid" : arqJson["uid"]}})
+        else:
+            colecao.insert_one({"nome":arqJson["nome"],
+                                "matricula" : str(arqJson["matricula"]),
+                                "curso" : "não informado",
+                                "foto" : None,
+                                "presenca" : [],
+                                "uid" : arqJson["uid"]})
+        return "foi"
+    return "não recebi nada"
+
 #if __name__ == '__main__':
 app.run(port=5002, debug=False)
