@@ -5,23 +5,31 @@
         <title>Menu</title> 
 
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='presenca.css') }}">
+        <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     </head>
 
     <body>
-        <div id = "body">
-            <h1>LISTA DE PRESENCA<span id = "s1"></span></h1>
-            <ul class = "student_list_presence">
-                <p class = "student_name">Data  //  Presença  //  Pontualidade</p>                          
-
-                {%for presenca in lpresenca%}
-                    <li class = "um_elemento">                        
-                        <div class = d_infos>
-                            <p class = "student_name"><span class = "s2">{{presenca[0]}}  //</span> <span class = "s3">{{presenca[1]}}  //</span>  <span class = "s4">{{presenca[2]}}</span></p>                            
-                        </div>
-                    </li>
-                {% endfor %} 
-            </ul>
-            <a href = "/"><button id = "btnVoltar">Voltar</button></a>
+        <div id="body" class="jumbotron text-center">
+            <h1>LISTA DE PRESENÇA<span id="s1"></span></h1>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr id = "primeiraLinha">
+                        <th>Data</th>
+                        <th>Presença</th>
+                        <th>Pontualidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for presenca in lpresenca %}
+                    <tr>
+                        <td>{{ presenca[0] }}</td>
+                        <td>{{ presenca[1] }}</td>
+                        <td>{{ presenca[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="/"><button id="btnVoltar">Voltar</button></a>
         </div>
     </body>
 

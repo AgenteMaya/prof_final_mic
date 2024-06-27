@@ -24,8 +24,18 @@ except Exception as e:
 '''
 
 banco = cliente["banco_proj_final"]
-colecao = banco["alunos"] #colecaoALunos
-colecaoDias = banco["aulas"]
+
+turma = "alunos"
+aula = "aulas"
+colecao = None
+colecaoDias = None
+
+
+def atualizaColecao():
+    global colecao
+    global colecaoDias
+    colecao = banco[turma] #colecaoALunos
+    colecaoDias = banco[aula]
 
 #lAlunos = []
 
@@ -41,7 +51,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route("/") #mudado
 @app.route("/index.html")
 def menu():    
+    atualizaColecao()
     lAlunos = []
+    print(turma)
+    print(aula)
     for elem in colecao.find():
         lAlunos.append(elem)
     return render_template("index.html", lAlunos = lAlunos)
@@ -119,46 +132,52 @@ def presenca(num):
 
 @app.route("/criaAula", methods = ["GET", "POST"])
 def criaAula():
-    colecaoDias.insert_one({"data":"23-05-2024", "hora" : "23:00:00"})
-    return "entrou no bd"
+    if request.method == "POST":
+        arqJson = request.get_json()
+        print(arqJson)
+        #arqJson = json.loads(arqJson)
+        colecaoDias.insert_one({"data" : arqJson["data"], "hora" : arqJson["hora"]})
+        return "entrou no bd"
+    return "não foi"
 
-@app.route("/passaPresenca", methods = ["GET", "POST"])
+@app.route("/passaPresenca", methods = ["GET", "POST"]) #testada
 def passaPresenca():
     if request.method == "POST":
         arqJson = request.get_json() # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx"}]}
-        #arqJson = json.dumps({"data": "23-05-2024", "presencas": [{"matricula": 2210833, "hora": "23:59:05"}, {"matricula": 2210834, "hora": "22:59:05"}]})
-        arqJson = json.loads(arqJson)
-        lMatriculas = []
-        lDatas = []
-        data = arqJson["data"]
-        data= datetime.strptime(arqJson["data"], "%d-%m-%Y")
-        data = data.strftime("%d-%m-%Y")
-        for aluno in arqJson["presencas"]:
-            lMatriculas.append(aluno["matricula"])
-            lDatas.append(datetime.strptime(aluno["hora"], "%H:%M:%S").time())
+    #arqJson = json.dumps({"data": "23-05-2024", "presencas": [{"matricula": 2210833, "hora": "23:59:05"}]})
+    #arqJson = json.loads(arqJson)
+    lMatriculas = []
+    lDatas = []
+    data = arqJson["data"]
+    data= datetime.strptime(arqJson["data"], "%d-%m-%Y")
+    data = data.strftime("%d-%m-%Y")
+    for aluno in arqJson["presencas"]:
+        lMatriculas.append(aluno["matricula"])
+        lDatas.append(datetime.strptime(aluno["hora"], "%H:%M:%S").time())
 
-        for aluno in colecao.find():
-            presencaAluno = []
-            if int(aluno["matricula"]) in lMatriculas:
-                ind = lMatriculas.index(int(aluno["matricula"]))
-                horaAluno = lDatas[ind]            
-                horaOficial = colecaoDias.find_one({"data" : data})
-                horaAula = datetime.strptime(horaOficial["hora"], "%H:%M:%S").time()
-                if horaAluno <= horaAula:
-                    presencaAluno = [data, "presente", "pontual"]
-                else:
-                    presencaAluno = [data, "presente", "atrasado"]
+    for aluno in colecao.find():
+        presencaAluno = []
+        if int(aluno["matricula"]) in lMatriculas:
+            ind = lMatriculas.index(int(aluno["matricula"]))
+            horaAluno = lDatas[ind]            
+            horaOficial = colecaoDias.find_one({"data" : data})
+            horaAula = datetime.strptime(horaOficial["hora"], "%H:%M:%S").time()
+            if horaAluno <= horaAula:
+                presencaAluno = [data, "presente", "pontual"]
             else:
-                presencaAluno = [data, "faltou", "-"]
+                presencaAluno = [data, "presente", "atrasado"]
+        else:
+            presencaAluno = [data, "faltou", "-"]
+        print(presencaAluno)
+        lAlunoPresenca = aluno["presenca"]
+        lAlunoPresenca.append(presencaAluno)
+        print(lAlunoPresenca)
+        colecao.update_one({"matricula" : aluno["matricula"]}, {"$set":{"presenca" : lAlunoPresenca}})
 
-            lAlunoPresenca = [ast.literal_eval(item) for item in aluno["presenca"]]
-            lAlunoPresenca.append(presencaAluno)
-            colecao.update_one({"matricula" : aluno["matricula"]}, {"$set":{"presenca" : lAlunoPresenca}})
-
-        return jsonify(arqJson)
+    return jsonify(arqJson)
     return "não foi"
 
-@app.route("/passaInfo", methods = ["GET", "POST"])
+@app.route("/passaInfo", methods = ["GET", "POST"]) #Testada
 def passaInfo():
     lAlunos = []
     for aluno in colecao.find():
@@ -166,7 +185,7 @@ def passaInfo():
     print(lAlunos)
     arqJson = json.dumps({"alunos" : lAlunos})
     print(arqJson)
-
+    """
     try:
         # Enviar JSON para o Arduino
         response = requests.post(f"{ARDUINO_IP}/endpoint_arduino", json={"alunos": lAlunos})
@@ -176,19 +195,20 @@ def passaInfo():
             return jsonify({"message": "Falha ao enviar dados para o Arduino.", "alunos": lAlunos}), 500
     except requests.exceptions.RequestException as e:
         return jsonify({"message": f"Erro de comunicação: {e}", "alunos": lAlunos}), 500
-    #return jsonify({"alunos" : lAlunos})
+    """
+    return jsonify({"alunos" : lAlunos})
 
 @app.route("/recebeCadastro", methods = ["GET", "POST"])
 def recebeCadastro():
     if request.method == "POST":
         arqJson = request.get_json() #{"uid": "anlifu", "nome" : "hdjfsakl", "matricula" : xxxxxx}
         #arqJson = json.dumps({"uid": "45649", "nome" : "hdjfsakl", "matricula" : 2210833})
-        arqJson = json.loads(arqJson)
+        #arqJson = json.loads(arqJson)
         alunoExiste = colecao.find_one({"matricula" : str(arqJson["matricula"])})
         if alunoExiste != None:
             colecao.update_one({"matricula" : str(arqJson["matricula"])}, {"$set":{"uid" : arqJson["uid"]}})
         else:
-            colecao.insert_one({"nome":arqJson["nome"],
+            colecao.insert_one({"nome":"não informado",
                                 "matricula" : str(arqJson["matricula"]),
                                 "curso" : "não informado",
                                 "foto" : None,
@@ -196,6 +216,25 @@ def recebeCadastro():
                                 "uid" : arqJson["uid"]})
         return "foi"
     return "não recebi nada"
+
+@app.route("/recebeTurma", methods = ["GET", "POST"]) #testada
+def recebeTurma():
+    global turma
+    global aula
+    if request.method == "POST":
+        arqJson = request.get_json()
+        #arqJson = json.loads(arqJson)
+        print(arqJson["turma"])
+        turma = arqJson["turma"]
+        print(turma)
+
+        if turma == "alunos":
+            aula = "aula"
+        else:
+            aula = "aula" + arqJson["turma"]
+
+        return jsonify(arqJson)
+    return "não veio nada"
 
 #if __name__ == '__main__':
 app.run(port=5002, debug=False)

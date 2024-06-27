@@ -24,3 +24,19 @@ li{
     height: 120px;
     margin: 0 20px;
 }
+
+#addBtn{
+    margin-top: 20px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", "Ubuntu", sans-serif;
+}
+
+body{
+    background-image: url("../static/uploads/sala_anime.jpg");
+    background-size: cover;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", "Ubuntu", sans-serif;
+}
