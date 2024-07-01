@@ -13,7 +13,7 @@
             <ul class = "student_list_unity">
                 {%for aluno in lAlunos%}
                     <li classe = "um_elemento">
-                        <img class = "student_photo" src = "static/uploads/{{aluno["foto"]}}" alt="">
+                        <img class = "student_photo" src="{{ url_for('static', filename='uploads/' ~ aluno['foto']) }}" alt="">
                         <div class = d_infos>
                             <p class = "student_name">{{aluno["nome"]}}</p>
                             <p class = "student_matricula">{{aluno["matricula"]}}</p>
