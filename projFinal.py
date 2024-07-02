@@ -134,6 +134,7 @@ def edita(num):
     global turmaAtual
     print(num)
     aluno = colecao.find_one({"matricula" : num, "turma" : turmaAtual})
+    print(aluno)
     lEdita = ["", "", ""]
     lEdita[0] = aluno["nome"]
     lEdita[1] = aluno["turma"]
@@ -213,8 +214,10 @@ def passaPresenca():
             lTurma.append(aluno["turma"])
 
         for aluno in colecao.find():
+            horaOficial = None
             presencaAluno = []
-            print(int(aluno["matricula"]))
+            print(aluno)
+            print(aluno["matricula"])
             print(lMatriculas)
             print(aluno["turma"])
             print(lTurma)
@@ -227,6 +230,8 @@ def passaPresenca():
 
                 lHorarios = colecaoDias.find_one({"codigo" : aluno["turma"]})["datas"]
                 print(lHorarios)
+                if lHorarios == None:
+                    return "Dia não cadastrado"
                 for dia in lHorarios:
                     if dia["data"] == data:
                         horaOficial = dia["hora"]
