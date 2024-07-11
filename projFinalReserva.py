@@ -196,46 +196,44 @@ def criaAula():
         return redirect(url_for("menu", turma = turmaAtual))
     return render_template("criaAula.html", turma = turmaAtual)
 
-@app.route("/recebePresenca", methods = ["GET", "POST"]) #testada
-def passaPresenca():
-    if request.method == "POST":
-        arqJson = request.get_json() # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx", "turma" : "YYY"}]}
+
+def passaPresenca(arqJson):
+    #if request.method == "POST":
+        #arqJson = request.get_json() # {"data : xx-xx-xxxx, "presencas" : [{"matricula" : xxx, "hora" : "xx:xx:xx", "turma" : "YYY"}]}
     #arqJson = json.dumps({"data": "23-05-2024", "presencas": [{"matricula": 2210833, "hora": "23:59:05"}]})
     #arqJson = json.loads(arqJson)
+    print(arqJson)
+    print(arqJson["data"])
+    lMatriculas = []
+    lHoras = []
+    lTurma = []
+    data = arqJson["data"]
+    data= datetime.strptime(arqJson["data"], "%d-%m-%Y")
+    data = data.strftime("%d-%m-%Y")
+    for aluno in arqJson["presencas"]:
+        lMatriculas.append(aluno["matricula"])
+        lHoras.append(datetime.strptime(aluno["hora"], "%H:%M:%S").time())
+        lTurma.append(aluno["turma"])
 
-        arqJson = arqJson[0]["presenca"]
-        print(arqJson)
-        print(type(arqJson))
-
-        
-        lMatriculas = []
-        lHoras = []
-        lTurma = []
-        data = arqJson["data"]
-        data= datetime.strptime(arqJson["data"], "%d-%m-%Y")
-        data = data.strftime("%d-%m-%Y")
-        for aluno in arqJson["presencas"]:
-            lMatriculas.append(aluno["matricula"])
-            lHoras.append(datetime.strptime(aluno["hora"], "%H:%M:%S").time())
-            lTurma.append(aluno["turma"])
-
-        for aluno in colecao.find():
+    for aluno in colecao.find():
             lAlunoPresenca = aluno["presenca"]
             horaOficial = None
             presencaAluno = []
             print(aluno)
-            print(aluno["matricula"])
-            print(lMatriculas)
-            print(aluno["turma"])
-            print(lTurma)
+            print("\n\n")
+
+            #print(aluno["matricula"])
+            #print(lMatriculas)
+            #print(aluno["turma"])
+            #print(lTurma)
             if int(aluno["matricula"]) in lMatriculas and aluno["turma"] in lTurma:
                 ind = lMatriculas.index(int(aluno["matricula"]))
-                print(ind)
+                #print(ind)
                 horaAluno = lHoras[ind] 
-                print(horaAluno)
-                print(colecaoDias.find_one({"codigo" : aluno["turma"]}))
+                #print(horaAluno)
+                #print(colecaoDias.find_one({"codigo" : aluno["turma"]}))
                 lHorarios = colecaoDias.find_one({"codigo" : aluno["turma"]})["datas"]
-                print(lHorarios)
+                #print(lHorarios)
                 if lHorarios == None:
                     return "Dia não cadastrado"
                 for dia in lHorarios:
@@ -244,7 +242,7 @@ def passaPresenca():
                 
                 if horaOficial == None:
                     return "Aula não cadastrada"
-                print(horaOficial)
+                #print(horaOficial)
                 horaAula = datetime.strptime(horaOficial, "%H:%M:%S").time()
                 
                 if horaAluno <= horaAula:
@@ -264,32 +262,33 @@ def passaPresenca():
                     presencaAluno = [data, "faltou", "-"]
                     lAlunoPresenca.append(presencaAluno)
 
-            print(presencaAluno)
+            #print(presencaAluno)
             
             print(lAlunoPresenca)
             colecao.update_one({"matricula" : aluno["matricula"], "turma" : aluno["turma"]}, {"$set":{"presenca" : lAlunoPresenca}})
-        return "foi"
-    return "não foi"
+    #return jsonify(arqJson)
+    #return "não foi"
 
-@app.route("/passaInfo", methods = ["GET", "POST"]) #Testada
 def passaInfo():
     lAlunos = []
     for aluno in colecao.find():
-        
         lAlunos.append({"nome" : aluno["nome"], "matricula" : aluno["matricula"], "uid" : aluno["uid"], "turma" : aluno["turma"]})
-    print(lAlunos)
+    #print(lAlunos)
     arqJson = json.dumps({"alunos" : lAlunos})
-    print(arqJson)
+    #print(arqJson)
     return jsonify({"alunos" : lAlunos})
 
-@app.route("/recebeCadastro", methods = ["GET", "POST"])
-def recebeCadastro():
-    if request.method == "POST":
-        arqJson = request.get_json() #{"uid": "anlifu", "nome" : "hdjfsakl", "matricula" : xxxxxx}
+
+def recebeCadastro(arqJson):
+    #if request.method == "POST":
+        #arqJson = request.get_json() #{"uid": "anlifu", "nome" : "hdjfsakl", "matricula" : xxxxxx}
         #arqJson = json.dumps({"uid": "45649", "nome" : "hdjfsakl", "matricula" : 2210833})
         #arqJson = json.loads(arqJson)
-        print(arqJson)
-        arqJson = arqJson[0]["alunos"]
+    print("entrei na cadastra")
+    print(type(arqJson))
+    print("\n\n")
+    if arqJson != []:    
+        print(arqJson["alunos"])
         for aluno in arqJson["alunos"]:
             print(aluno)
             alunoExiste = colecao.find_one({"matricula" : str(aluno["matricula"]), "turma": aluno["turma"]})
@@ -305,8 +304,29 @@ def recebeCadastro():
                                     "presenca" : [],
                                     "uid" : aluno["uid"],
                                     })
-        return "foi"
-    return "não recebi nada"
+    #    return "foi"
+    #return "não recebi nada"
+
+@app.route("/recebeEEnvia", methods = ["GET", "POST"])
+def recebeEEnvia():
+    if request.method == "POST":
+        arqJson = request.get_json()
+        print(arqJson)
+        print("\n\n")
+        arqJson = arqJson["data"]
+        presencas = arqJson["presenca"]
+        print("entrei na presenca")
+        passaPresenca(presencas)
+        print("\n\n")
+        print("vai pegar o cadastro")
+        print(arqJson["cadastro"])
+        print(type(arqJson["cadastro"]))
+
+        cadastros = arqJson["cadastro"]
+        recebeCadastro(cadastros)
+        return "ok"
+    else:        
+        return passaInfo()    
 
 @app.route("/criaTurma", methods = ["GET", "POST"]) #testada
 def criaTurma():
